@@ -1,0 +1,10 @@
+build/
+install/
+log/
+backup/
+projects/
+09.04.webm
+__pycache__/
+*.pyc
+.pytest_cache/
+

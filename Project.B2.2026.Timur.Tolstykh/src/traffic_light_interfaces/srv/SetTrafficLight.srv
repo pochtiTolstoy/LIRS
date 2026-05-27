@@ -1,0 +1,8 @@
+bool manual
+string active_axis
+float32 green_duration
+float32 yellow_duration
+---
+bool accepted
+string message
+
