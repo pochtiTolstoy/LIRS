@@ -31,6 +31,8 @@ class TrafficLightCycle:
             first_axis = self.horizontal_axis
             second_axis = self.vertical_axis
 
+        # One full cycle alternates green/yellow for one axis and then
+        # green/yellow for the other axis.
         self.phases = [
             {
                 'active_axis': first_axis,
@@ -101,6 +103,8 @@ class TrafficLightCycle:
 
         for light_phase in self.phases:
             duration = light_phase['duration']
+            # Move through the phase list by subtracting durations until we
+            # land in the current slice of the cycle.
             if phase < duration:
                 return {
                     'active_axis': light_phase['active_axis'],

@@ -2,6 +2,8 @@ from math import pi
 
 
 def axis_position(axis: str, x: float, y: float) -> float:
+    # Each turtle moves only along one axis, so we project the pose onto the
+    # coordinate that matters for crossing decisions.
     if axis == 'horizontal':
         return x
     return y
@@ -45,6 +47,8 @@ def should_request_crossing(
     intersection: float,
     request_distance: float,
 ) -> bool:
+    # Do not send duplicate requests while one is already pending or once the
+    # turtle has already received permission for this crossing.
     if turtle['request_pending'] or turtle['permission_granted']:
         return False
 
@@ -71,9 +75,12 @@ def should_stop(
     if turtle['permission_granted']:
         return False
 
+    # This is the hard stop line right before the center of the intersection.
     if distance <= stop_distance:
         return True
 
+    # Slightly earlier than the stop line we already respect the light, so the
+    # turtle does not slide into the intersection.
     if distance <= light_buffer_distance and not is_axis_green(
         light_state,
         turtle['axis'],
@@ -85,6 +92,8 @@ def should_stop(
 
 
 def desired_heading(axis: str, direction: int) -> float:
+    # The sign of direction decides whether the turtle should face right/left
+    # on the horizontal lane or up/down on the vertical lane.
     if axis == 'horizontal':
         if direction > 0:
             return 0.0

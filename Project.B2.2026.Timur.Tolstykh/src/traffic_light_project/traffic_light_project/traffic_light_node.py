@@ -30,17 +30,20 @@ class TrafficLightNode(Node):
             yellow_duration=self.get_parameter('yellow_duration').value,
         )
         self.started_at = self.get_clock().now()
+        # Topic = continuously publish the current traffic light state.
         self.publisher = self.create_publisher(
             TrafficLight,
             '/traffic_light/state',
             10,
         )
+        # Service = quick reconfiguration with an immediate response.
         self.service = self.create_service(
             SetTrafficLight,
             '/traffic_light/configure',
             self.configure_traffic_light,
             callback_group=self.callback_group,
         )
+        # Action = a turtle may need to wait several seconds for permission.
         self.action_server = ActionServer(
             self,
             CrossIntersection,
@@ -93,6 +96,8 @@ class TrafficLightNode(Node):
             response.message = str(error)
             return response
 
+        # Restart time counting so the updated automatic sequence begins from
+        # its first phase.
         self.started_at = self.get_clock().now()
         response.accepted = True
         response.message = message
@@ -125,6 +130,8 @@ class TrafficLightNode(Node):
                     result.message = 'request stopped during shutdown'
                 return result
 
+            # Feedback tells the client that the request is still alive and
+            # waiting for the matching green phase.
             feedback.status = 'waiting for green on ' + axis
             feedback.seconds_waiting = float(self.elapsed_seconds() - waiting_started)
             try:

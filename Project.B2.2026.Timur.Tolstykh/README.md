@@ -58,3 +58,11 @@ source install/setup.zsh
 colcon test --event-handlers console_direct+
 colcon test-result --verbose
 ```
+
+source /opt/ros/jazzy/setup.zsh
+source install/setup.zsh
+ros2 service call /traffic_light/configure traffic_light_interfaces/srv/SetTrafficLight "{manual: true, active_axis: horizontal, green_duration: 0.0, yellow_duration: 0.0}"
+
+source /opt/ros/jazzy/setup.zsh
+source install/setup.zsh
+ros2 service call /traffic_light/configure traffic_light_interfaces/srv/SetTrafficLight "{manual: false, active_axis: horizontal, green_duration: 5.0, yellow_duration: 1.5}"

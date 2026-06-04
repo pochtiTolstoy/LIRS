@@ -16,15 +16,15 @@ from turtlesim.msg import Pose
 from turtlesim.srv import Spawn, TeleportAbsolute
 
 
-INTERSECTION = 5.0
-LINEAR_SPEED = 1.6
-ANGULAR_GAIN = 5.0
-REQUEST_DISTANCE = 1.2
-STOP_DISTANCE = 0.7
-LIGHT_BUFFER_DISTANCE = 1.1
-CLEAR_DISTANCE = 0.5
-MIN_POSITION = 0.8
-MAX_POSITION = 10.2
+INTERSECTION = 5.0  # Coordinate of the crossing center in turtlesim.
+LINEAR_SPEED = 1.6  # Forward speed when the turtle is allowed to move.
+ANGULAR_GAIN = 5.0  # How strongly the turtle turns toward the target heading.
+REQUEST_DISTANCE = 1.2  # Distance from the center where a crossing request is sent.
+STOP_DISTANCE = 0.7  # Final stop line before entering the intersection.
+LIGHT_BUFFER_DISTANCE = 1.1  # Distance where the turtle already starts obeying the light.
+CLEAR_DISTANCE = 0.5  # How far past the center the turtle must go to clear the crossing.
+MIN_POSITION = 0.8  # Minimum lane coordinate before the turtle turns around.
+MAX_POSITION = 10.2  # Maximum lane coordinate before the turtle turns around.
 
 
 def normalize_angle(angle: float) -> float:
@@ -89,6 +89,8 @@ class TurtleDriverNode(Node):
         self.get_logger().info('turtle driver started')
 
     def pose_callback(self, turtle_name: str):
+        # Return a separate callback for each turtle topic while reusing the
+        # same update logic.
         def callback(msg: Pose) -> None:
             self.poses[turtle_name] = msg
 
@@ -112,12 +114,14 @@ class TurtleDriverNode(Node):
             self.teleport_client.wait_for_service(timeout_sec=0.1)
             return
 
+        # turtle1 already exists in turtlesim, so here we only reposition it.
         teleport = TeleportAbsolute.Request()
         teleport.x = 1.0
         teleport.y = INTERSECTION
         teleport.theta = 0.0
         self.teleport_client.call_async(teleport)
 
+        # turtle2 is spawned onto the perpendicular lane.
         spawn = Spawn.Request()
         spawn.x = INTERSECTION
         spawn.y = 1.0
@@ -141,6 +145,8 @@ class TurtleDriverNode(Node):
                 turtle['request_pending'] = False
                 turtle['permission_granted'] = False
 
+            # Once the turtle is clearly beyond the center, the one-time
+            # crossing permission should no longer apply.
             if turtle['permission_granted'] and has_cleared_center(
                 position,
                 turtle['direction'],
@@ -179,6 +185,8 @@ class TurtleDriverNode(Node):
         goal.axis = turtle['axis']
 
         turtle['request_pending'] = True
+        # The action is asynchronous: feedback and final result will come back
+        # later via callbacks while the control loop keeps running.
         send_goal_future = self.crossing_client.send_goal_async(
             goal,
             feedback_callback=self.feedback_callback(turtle_name),
