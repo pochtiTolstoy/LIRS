@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
 from std_msgs.msg import Int32
+from std_msgs.msg import String
 
 
 def is_prime(number):
@@ -32,11 +32,9 @@ class PrimeFilter(Node):
         self.publisher_ = self.create_publisher(String, 'PrimeNumberTopic', 10)
         self.publisher_
 
-
     def listener_callback(self, msg):
         number = msg.data
         filtered_msg = String()
-
 
         if is_prime(number):
             filtered_msg.data = 'prime'
@@ -46,7 +44,6 @@ class PrimeFilter(Node):
             self.get_logger().info(f'Received: {number} (not a prime)')
 
         self.publisher_.publish(filtered_msg)
-
 
 
 def main(args=None):
