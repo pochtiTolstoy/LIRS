@@ -1,0 +1,5 @@
+uint64 number
+---
+uint64[] factors
+---
+uint64 factor
